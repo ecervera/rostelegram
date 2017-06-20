@@ -1,6 +1,6 @@
 ## ROS Telegram Package
 
-Send a receive ROS topics through Telegram.
+Send and receive ROS topics through Telegram.
 
 ## Contributors
 

@@ -1,0 +1,8 @@
+<launch>
+  <node name="rosapi" pkg="rosapi" type="rosapi_node">
+     <param name="topics_glob" value="[/count, /heartbeat]" />
+  </node>
+  <node name="count_publisher" pkg="rostelegram" type="count_publisher" />
+  <node name="heartbeat_publisher" pkg="rostelegram" type="heartbeat_publisher" />
+
+</launch>
