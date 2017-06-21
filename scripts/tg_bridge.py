@@ -17,7 +17,8 @@ def list_topics(bot, update):
 	s = ''
 	for topic in topics:
 		s += topic + '\n'
-	update.message.reply_text(s)
+	#update.message.reply_text(s)
+	update.message.reply_text(msg_type)
 
 def print_info(bot, update):
 	s = 'ROS Telegram Bot\n'
@@ -78,7 +79,8 @@ def send(outgoing):
 	msg = outgoing['msg']
 	op = outgoing['op']
 	for tlg_id in subscribers[topic]:
-		msg_dict[tlg_id].reply_text( str(msg) )
+		#msg_dict[tlg_id].reply_text( str(msg) )
+		msg_dict[tlg_id].reply_text( {'topic':topic, 'msg':msg} )
 	lock.release()
 	#print(outgoing)
 
