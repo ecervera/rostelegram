@@ -1,8 +1,13 @@
 <launch>
   <node name="rosapi" pkg="rosapi" type="rosapi_node">
      <param name="topics_glob" value="[/count, /heartbeat]" />
+     <param name="services_glob" value="[/add_two_ints]" />
   </node>
+
   <node name="count_publisher" pkg="rostelegram" type="count_publisher" />
   <node name="heartbeat_publisher" pkg="rostelegram" type="heartbeat_publisher" />
 
+  <node name="add_two_ints_server" pkg="rostelegram" type="add_two_ints_server" />
+
 </launch>
+
