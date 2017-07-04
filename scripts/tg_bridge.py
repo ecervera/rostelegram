@@ -10,6 +10,11 @@ from rosbridge_library.capabilities.subscribe import Subscribe
 from rosbridge_library.capabilities.publish import Publish
 from rosbridge_library.capabilities.call_service import CallService
 
+from cv_bridge import CvBridge, CvBridgeError
+from io import BytesIO
+import numpy as np
+import cv2
+
 import telegram.ext as tgext
 
 def error(bot, update, error):
@@ -89,8 +94,25 @@ def send(outgoing):
 		topic = outgoing['topic']
 		msg = outgoing['msg']
 		op = outgoing['op']
-		for tlg_id in subscribers[topic]:
-			msg_dict[tlg_id].reply_text( {'topic':topic, 'msg':msg} )
+		if topic=='/image':
+			try:
+				#cv_image = CvBridge().imgmsg_to_cv2(msg, desired_encoding="passthrough")
+				blank_image = np.zeros((120,160,3), np.uint8)
+				blank_image[:,0:80] = (255,0,0)
+				blank_image[:,80:160] = (0,255,0)
+				retval, enc_image = cv2.imencode('.png', blank_image)
+				bio = BytesIO()
+				bio.name = 'image.png'
+				bio.write(enc_image)
+				for tlg_id in subscribers[topic]:
+					bio.seek(0)
+					msg_dict[tlg_id].reply_photo( bio )
+			except CvBridgeError as e:
+				print('CVBRIDGEERROR')
+				print(e)
+		else:
+			for tlg_id in subscribers[topic]:
+				msg_dict[tlg_id].reply_text( {'topic':topic, 'msg':msg} )
 		lock.release()
 	elif 'service' in outgoing:
 		values = outgoing['values']

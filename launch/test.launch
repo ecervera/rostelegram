@@ -1,11 +1,12 @@
 <launch>
   <node name="rosapi" pkg="rosapi" type="rosapi_node">
-     <param name="topics_glob" value="[/count, /heartbeat, /echo]" />
+     <param name="topics_glob" value="[/count, /heartbeat, /image, /echo]" />
      <param name="services_glob" value="[/add_two_ints]" />
   </node>
 
   <node name="count_publisher" pkg="rostelegram" type="count_publisher" />
   <node name="heartbeat_publisher" pkg="rostelegram" type="heartbeat_publisher" />
+  <node name="image_publisher" pkg="rostelegram" type="image_publisher" />
   <node name="echo_subscriber" pkg="rostelegram" type="echo_subscriber" output="screen" />
 
   <node name="add_two_ints_server" pkg="rostelegram" type="add_two_ints_server" />
