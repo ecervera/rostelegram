@@ -10,6 +10,7 @@ from rosbridge_library.capabilities.subscribe import Subscribe
 from rosbridge_library.capabilities.publish import Publish
 from rosbridge_library.capabilities.call_service import CallService
 
+from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from io import BytesIO
 import numpy as np
@@ -88,6 +89,15 @@ class TgListener():
 			msg_dict[tlg_id] = msg
 		lock.release()
 
+import StringIO
+import uu
+
+def uu2string(data, mode=None):
+    outfile = StringIO.StringIO()
+    infile = StringIO.StringIO(data)
+    uu.decode(infile, outfile, mode)
+    return outfile.getvalue()
+
 def send(outgoing):
 	if 'topic' in outgoing:
 		lock.acquire()
@@ -96,11 +106,20 @@ def send(outgoing):
 		op = outgoing['op']
 		if topic=='/image':
 			try:
-				#cv_image = CvBridge().imgmsg_to_cv2(msg, desired_encoding="passthrough")
-				blank_image = np.zeros((120,160,3), np.uint8)
-				blank_image[:,0:80] = (255,0,0)
-				blank_image[:,80:160] = (0,255,0)
+				#cv_image = CvBridge().imgmsg_to_cv2(img_msg, desired_encoding="passthrough")
+				#blank_image = np.zeros((msg['height'],msg['width'],3), np.uint8)
+				#blank_image[:,0:80] = (255,0,0)
+				#blank_image[:,80:160] = (0,255,0)
+				#print(msg['encoding'])
+				#print(msg['step'])
+				print(uu2string(msg['data'][:640]))
+				#print(msg['data'][-4:])
+				blank_image = np.fromstring(uu2string(msg['data']), dtype=np.uint8)
+				#blank_image = np.fromstring(msg['data'], dtype=np.uint8)
+				blank_image = np.reshape(blank_image, (msg['height'],msg['width'],3))
+				#print(blank_image[0,0], blank_image[119,159])
 				retval, enc_image = cv2.imencode('.png', blank_image)
+				#retval, enc_image = cv2.imencode('.png', cv_image)
 				bio = BytesIO()
 				bio.name = 'image.png'
 				bio.write(enc_image)
