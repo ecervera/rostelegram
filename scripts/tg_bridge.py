@@ -61,8 +61,7 @@ def unsubscribe(bot, update, args):
 def call(bot, update, args):
 	msg = update.message
 	msg_dict[msg.from_user.id] = msg
-	call_srv.call_service(loads(dumps({"op": "call_service", "id": msg.from_user.id, "service": args[0], "args": [int(args[1]),int(args[2])] })))
-	#call_srv.call_service(loads(dumps({"op": "call_service", "id": msg.from_user.id, "service": args[0], "args": {'a':int(args[1]),'b':int(args[2])} })))
+	call_srv.call_service(loads(dumps({"op": "call_service", "id": msg.from_user.id, "service": args[0], "args": map(loads, args[1:]) })))
 
 class TgListener():
 	def __init__(self, topic):
