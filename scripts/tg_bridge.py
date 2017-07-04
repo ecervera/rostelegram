@@ -7,6 +7,7 @@ from json import loads, dumps
 from rosapi.srv import Topics
 from rosbridge_library.protocol import Protocol
 from rosbridge_library.capabilities.subscribe import Subscribe
+from rosbridge_library.capabilities.publish import Publish
 from rosbridge_library.capabilities.call_service import CallService
 
 import telegram.ext as tgext
@@ -63,6 +64,9 @@ def call(bot, update, args):
 	msg_dict[msg.from_user.id] = msg
 	call_srv.call_service(loads(dumps({"op": "call_service", "id": msg.from_user.id, "service": args[0], "args": map(loads, args[1:]) })))
 
+def publish(bot, update, args):
+	pub.publish(loads(dumps({"topic": args[0], "msg": {"data": args[1]}})))
+
 class TgListener():
 	def __init__(self, topic):
 		self.topic = topic
@@ -86,15 +90,12 @@ def send(outgoing):
 		msg = outgoing['msg']
 		op = outgoing['op']
 		for tlg_id in subscribers[topic]:
-			#msg_dict[tlg_id].reply_text( str(msg) )
 			msg_dict[tlg_id].reply_text( {'topic':topic, 'msg':msg} )
 		lock.release()
-		#print(outgoing)
 	elif 'service' in outgoing:
 		values = outgoing['values']
 		tlg_id = outgoing['id']
 		msg_dict[tlg_id].reply_text( values )
-		#print(outgoing)
 
 if __name__ == '__main__':
 
@@ -119,9 +120,9 @@ if __name__ == '__main__':
 		subscribers[topic] = set()
 		sub.subscribe(loads(dumps({"op": "subscribe", "topic": topic, "type": msg_type[topic]})))
 
+	pub = Publish(proto)
 	call_srv = CallService(proto)
 
-	#rospy.spin()
 	updater = tgext.Updater(cfg['token'])
 	dp = updater.dispatcher
 
@@ -130,6 +131,7 @@ if __name__ == '__main__':
 	dp.add_handler(tgext.CommandHandler('topics', list_topics))
 	dp.add_handler(tgext.CommandHandler('subscribe', subscribe, pass_args=True))
 	dp.add_handler(tgext.CommandHandler('unsubscribe', unsubscribe, pass_args=True))
+	dp.add_handler(tgext.CommandHandler('publish', publish, pass_args=True))
 	dp.add_handler(tgext.CommandHandler('call', call, pass_args=True))
 
 	tglist = []
