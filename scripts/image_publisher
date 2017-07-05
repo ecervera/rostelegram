@@ -13,8 +13,8 @@ if __name__ == '__main__':
 	pub = rospy.Publisher('image', Image, queue_size=10)
 	r = rospy.Rate(0.2) 
 	blank_image = np.zeros((120,160,3), np.uint8)
-	blank_image[:,0:80] = (255,255,255)
-	blank_image[:,80:160] = (0,0,0)
+	blank_image[:,0:80] = (255,0,0)
+	blank_image[:,80:160] = (0,255,0)
 	msg = CvBridge().cv2_to_imgmsg(blank_image, encoding='bgr8')
 	while not rospy.is_shutdown():
 	   pub.publish(msg)

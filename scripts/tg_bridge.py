@@ -89,14 +89,7 @@ class TgListener():
 			msg_dict[tlg_id] = msg
 		lock.release()
 
-import StringIO
-import uu
-
-def uu2string(data, mode=None):
-    outfile = StringIO.StringIO()
-    infile = StringIO.StringIO(data)
-    uu.decode(infile, outfile, mode)
-    return outfile.getvalue()
+import base64
 
 def send(outgoing):
 	if 'topic' in outgoing:
@@ -105,30 +98,16 @@ def send(outgoing):
 		msg = outgoing['msg']
 		op = outgoing['op']
 		if topic=='/image':
-			try:
-				#cv_image = CvBridge().imgmsg_to_cv2(img_msg, desired_encoding="passthrough")
-				#blank_image = np.zeros((msg['height'],msg['width'],3), np.uint8)
-				#blank_image[:,0:80] = (255,0,0)
-				#blank_image[:,80:160] = (0,255,0)
-				#print(msg['encoding'])
-				#print(msg['step'])
-				print(uu2string(msg['data'][:640]))
-				#print(msg['data'][-4:])
-				blank_image = np.fromstring(uu2string(msg['data']), dtype=np.uint8)
-				#blank_image = np.fromstring(msg['data'], dtype=np.uint8)
-				blank_image = np.reshape(blank_image, (msg['height'],msg['width'],3))
-				#print(blank_image[0,0], blank_image[119,159])
-				retval, enc_image = cv2.imencode('.png', blank_image)
-				#retval, enc_image = cv2.imencode('.png', cv_image)
-				bio = BytesIO()
-				bio.name = 'image.png'
-				bio.write(enc_image)
-				for tlg_id in subscribers[topic]:
-					bio.seek(0)
-					msg_dict[tlg_id].reply_photo( bio )
-			except CvBridgeError as e:
-				print('CVBRIDGEERROR')
-				print(e)
+			data = base64.b64decode(msg['data'])
+			blank_image = np.fromstring(data, dtype=np.uint8)
+			blank_image = np.reshape(blank_image, (msg['height'],msg['width'],3))
+			retval, enc_image = cv2.imencode('.png', blank_image)
+			bio = BytesIO()
+			bio.name = 'image.png'
+			bio.write(enc_image)
+			for tlg_id in subscribers[topic]:
+				bio.seek(0)
+				msg_dict[tlg_id].reply_photo( bio )
 		else:
 			for tlg_id in subscribers[topic]:
 				msg_dict[tlg_id].reply_text( {'topic':topic, 'msg':msg} )
